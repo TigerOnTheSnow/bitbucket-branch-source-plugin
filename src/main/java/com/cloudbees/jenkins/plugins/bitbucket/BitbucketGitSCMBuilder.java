@@ -54,6 +54,8 @@ import jenkins.scm.api.mixin.ChangeRequestCheckoutStrategy;
 import jenkins.scm.api.mixin.TagSCMHead;
 import org.apache.commons.lang.StringUtils;
 
+import static jenkins.scm.api.mixin.ChangeRequestCheckoutStrategy.HEAD;
+
 /**
  * A {@link GitSCMBuilder} specialized for bitbucket.
  *
@@ -98,7 +100,9 @@ public class BitbucketGitSCMBuilder extends GitSCMBuilder<BitbucketGitSCMBuilder
                 withRefSpec("+refs/heads/" + branchName + ":refs/remotes/@{remote}/" + head.getName());
             } else {
                 String pullId = ((PullRequestSCMHead) head).getId();
-                withRefSpec("+refs/pull-requests/" + pullId + "/from:refs/remotes/@{remote}/" + head.getName());
+                ChangeRequestCheckoutStrategy checkoutStrategy = ((PullRequestSCMHead) head).getCheckoutStrategy();
+                String checkoutStrategyRefsName = (checkoutStrategy==HEAD)?"from":"merge";
+                withRefSpec("+refs/pull-requests/" + pullId + "/" + checkoutStrategyRefsName + ":refs/remotes/@{remote}/" + head.getName());
             }
         } else if (head instanceof TagSCMHead ){
             withRefSpec("+refs/tags/" + head.getName() + ":refs/tags/" + head.getName());
